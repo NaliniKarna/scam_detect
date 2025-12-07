@@ -1,0 +1,1 @@
+# scamsniper app package

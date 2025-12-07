@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+transformers
+torch
+requests
+python-dotenv
+pydantic
+beautifulsoup4
+easyocr
+Pillow
+opencv-python
