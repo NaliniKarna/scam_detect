@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import logging
 from app.routers.report import router as report_router
+from app.routers import scan, feedback, support, settings
 from app.routers import classify, health, email, transaction
 
 logger = logging.getLogger(__name__)
@@ -37,12 +39,24 @@ app.add_middleware(
 app.include_router(classify, prefix="/api")
 # app.include_router(report, prefix="/api")
 app.include_router(report_router)
+app.include_router(scan.router)
+app.include_router(feedback.router)
+app.include_router(support.router)
 app.include_router(email.router)
+app.include_router(settings.router, prefix="/api")
 app.include_router(transaction.router)
 app.include_router(health, prefix="/api")
 if ocr_available and ocr is not None:
     app.include_router(ocr.router, prefix="/api")
 
+admin_path = os.path.join(os.path.dirname(__file__), "adminDash")
+admin_path = os.path.abspath(admin_path)
+
+app.mount("/adminDash", StaticFiles(directory=admin_path), name="adminDash")
+
+@app.get("/admin")
+async def admin_redirect():
+    return RedirectResponse(url="/adminDash/index.html")
 # ------------------------------
 # FRONTEND STATIC FILES
 # ------------------------------
