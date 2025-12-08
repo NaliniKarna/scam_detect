@@ -105,8 +105,8 @@ navItems.forEach(n => {
 // --- State Handling ---
 // -------------------------------
 const state = {
-  scans: JSON.parse(localStorage.getItem('scans') || '[]'),
-  feedback: JSON.parse(localStorage.getItem('feedback') || '[]'),
+  scans: [],
+  feedback: [],
   reports: [], 
   theme: localStorage.getItem('theme') || 'dark'
 };
@@ -132,11 +132,28 @@ $('#themeToggle')?.addEventListener('click', () => {
 // -------------------------------
 const truncate = (str, n) => str.length > n ? str.slice(0, n - 1) + '…' : str;
 
-function saveScan(scan) {
+async function saveScan(scan) {
+  // 1️⃣ Save locally as before
   state.scans.push(scan);
   localStorage.setItem('scans', JSON.stringify(state.scans));
   refreshStats();
 
+  // 2️⃣ Send scan to backend
+  try {
+    const res = await fetch('/scan/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(scan)
+    });
+    const data = await res.json();
+    if (!data.success) {
+      console.warn('Backend failed to save scan:', data);
+    }
+  } catch (err) {
+    console.error('Error saving scan to backend:', err);
+  }
+
+  // 3️⃣ Update live alerts
   const live = $('#liveAlerts');
   if (live) {
     live.innerHTML = `<div style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:8px">
@@ -145,6 +162,7 @@ function saveScan(scan) {
     </div>` + live.innerHTML;
   }
 }
+
 
 function refreshStats() {
   const hist = $('#historyTable tbody');
@@ -242,132 +260,105 @@ function renderScanner(type) {
     }
 
     btn.addEventListener('click', async () => {
-        const resultDiv = $('#scanResult');
-        let input = '', verdict = 'Safe', score = 0, reasons = [];
+    const resultDiv = $('#scanResult');
+    let input = '', verdict = 'Safe', score = 0, reasons = [];
 
-        try {
-            if(type === 'text' || type === 'url') {
-                input = $('#scanInput').value.trim();
-                if (!input) { alert(`Enter ${type}`); return; }
+    try {
+      if(type === 'text' || type === 'url') {
+        input = $('#scanInput').value.trim();
+        if (!input) { alert(`Enter ${type}`); return; }
+        const body = type==='text' ? { text: input, url: null } : { text: '', url: input };
+        const data = await postAPI('/api/classify/', body);
+        verdict = data.status?.toUpperCase() || 'SAFE';
+        score = data.score ?? 0;
+        reasons = data.reasons ?? [];
+        const color = verdict === "SCAM" ? "#ef4444" : verdict === "SUSPICIOUS" ? "#ffbf00" : "#10b981";
+        const reasonsDiv = reasons.length ? `<div class="small">Reasons: ${reasons.join(', ')}</div>` : '';
+        resultDiv.innerHTML = `<div class="risk" style="color:${color}; font-weight:800;">${verdict}</div>
+                               Score: ${score}${reasonsDiv}`;
 
-                const body = type==='text' ? { text: input, url: null } : { text: '', url: input };
-                const data = await postAPI('/api/classify/', body);
-
-                verdict = data.status?.toUpperCase() || 'SAFE';
-                score = data.score ?? 0;
-                reasons = data.reasons ?? [];
-
-                const color = verdict === "SCAM" ? "#ef4444" 
-                            : verdict === "SUSPICIOUS" ? "#ffbf00" 
-                            : "#10b981";
-
-                const reasonsDiv = reasons.length ? `<div class="small">Reasons: ${reasons.join(', ')}</div>` : '';
-
-                resultDiv.innerHTML = `
-                    <div class="risk" style="color:${color}; font-weight:800;">${verdict}</div>
-                    Score: ${score}
-                    ${reasonsDiv}
-                `;
-
-                saveScan({ type, input, verdict, score, when: Date.now() });
-                renderTrendChart();
-                renderRiskGauge(score);
-            }else if(type === 'transaction') {
-                const txnData = {
-                    amount: parseFloat($('#txnAmount').value),
-                    currency: $('#txnCurrency').value.trim(),
-                    timestamp: $('#txnTimestamp').value.trim(),
-                    transaction_id: $('#txnId').value.trim(),
-                    sender: $('#txnSender').value.trim(),
-                    recipient: $('#txnRecipient').value.trim(),
-                    status: $('#txnStatus').value.trim(),
-                    description: $('#txnDescription').value.trim()
-                };
-
-                const file = $('#txnFile').files[0];
-                let res, data;
-
-                if(file) {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('transaction_json', JSON.stringify(txnData));
-
-                    res = await fetch('/api/transaction/check-image', { method: 'POST', body: formData });
-                    data = await res.json();
-                } else {
-                    res = await fetch('/api/transaction/validate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(txnData)
-                    });
-                    data = await res.json();
-                }
-
-                // Use score to determine Safe/Suspicious/Scam
-                score = data.risk_score ?? 0;
-                const { label, color } = getRiskCategory(score);
-                verdict = label;
-                reasons = data.reasons ?? [];
-
-                const textPreview = data.extracted_text ? `<div class="small">Extracted Text: ${data.extracted_text.substring(0, 300)}</div>` : '';
-                const reasonsDiv = reasons.length ? `<div class="small">Reasons: ${reasons.join(', ')}</div>` : '';
-
-                resultDiv.innerHTML = `<div class="risk" style="color:${color}; font-weight:800;">${verdict.toUpperCase()}</div>
-                                       Score: ${score}${textPreview}${reasonsDiv}`;
-
-                input = JSON.stringify(txnData);
-            } else if (type === 'image' || type === 'ocr') {
-                const file = $('#scanFile').files[0];
-                if (!file) { alert('Select an image'); return; }
-                input = file.name;
-                const formData = new FormData();
-                formData.append('file', file);
-                const res = await fetch('/api/ocr/scan', { method: 'POST', body: formData });
-                const data = await res.json();
-                if (data.error) {
-                    verdict = "Unknown";
-                    score = 0;
-                    resultDiv.textContent = "Error: " + data.error;
-                } else {
-                    score = data.score ?? 0;
-                    const { label, color } = getRiskCategory(score);
-                    verdict = label;
-                    const textPreview = data.text_extracted ? `<div class="small">Text: ${data.text_extracted.substring(0, 100)}</div>` : '';
-                    resultDiv.innerHTML = `<div class="risk" style="color:${color}; font-weight:800;">${verdict}</div>Score: ${score}${textPreview}`;
-                }
-                saveScan({ type, input, verdict, score, when: Date.now() });
-                renderTrendChart();
-                renderRiskGauge(score);
-                return; // exit here for image scanner
-
-            } else if (type === 'email') {
-                const sender = $('#emailSender').value.trim();
-                const subject = $('#emailSubject').value.trim();
-                const bodyText = $('#emailBody').value.trim();
-                if (!sender || !subject || !bodyText) { alert('Enter sender, subject, body'); return; }
-
-                const body = { sender, subject, body: bodyText };
-                input = `${sender} | ${truncate(subject,50)}`;
-                const res = await fetch('/api/email/check', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-                const data = await res.json();
-                score = data.risk_score ?? 0;
-                const { label, color } = getRiskCategory(score);
-                verdict = label;
-                reasons = data.reasons ?? [];
-                const reasonsDiv = reasons.length ? `<div class="small">Reasons: ${reasons.join(', ')}</div>` : '';
-                resultDiv.innerHTML = `<div class="risk" style="color:${color}; font-weight:800;">${verdict}</div>Score: ${score}${reasonsDiv}`;
-            }
-
-            // Save scan & update charts
-            saveScan({ type, input, verdict, score, when: Date.now() });
-            renderTrendChart();
-            renderRiskGauge(score);
-
-        } catch (err) {
-            console.error(err);
-            resultDiv.textContent = 'Error: Failed to scan.';
+      } else if(type === 'transaction') {
+        const txnData = {
+          amount: parseFloat($('#txnAmount').value),
+          currency: $('#txnCurrency').value.trim(),
+          timestamp: $('#txnTimestamp').value.trim(),
+          transaction_id: $('#txnId').value.trim(),
+          sender: $('#txnSender').value.trim(),
+          recipient: $('#txnRecipient').value.trim(),
+          status: $('#txnStatus').value.trim(),
+          description: $('#txnDescription').value.trim()
+        };
+        const file = $('#txnFile').files[0];
+        let data;
+        if(file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('transaction_json', JSON.stringify(txnData));
+          const res = await fetch('/api/transaction/check-image', { method: 'POST', body: formData });
+          data = await res.json();
+        } else {
+          const res = await fetch('/api/transaction/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(txnData)
+          });
+          data = await res.json();
         }
-    });
+        score = data.risk_score ?? 0;
+        const { label, color } = getRiskCategory(score);
+        verdict = label;
+        reasons = data.reasons ?? [];
+        input = JSON.stringify(txnData);
+        const textPreview = data.extracted_text ? `<div class="small">Extracted Text: ${data.extracted_text.substring(0,300)}</div>` : '';
+        const reasonsDiv = reasons.length ? `<div class="small">Reasons: ${reasons.join(', ')}</div>` : '';
+        resultDiv.innerHTML = `<div class="risk" style="color:${color}; font-weight:800;">${verdict.toUpperCase()}</div>
+                               Score: ${score}${textPreview}${reasonsDiv}`;
+
+      } else if(type === 'image' || type === 'ocr') {
+        const file = $('#scanFile').files[0];
+        if (!file) { alert('Select an image'); return; }
+        input = file.name;
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/ocr/scan', { method:'POST', body: formData });
+        const data = await res.json();
+        if(data.error){
+          verdict="Unknown"; score=0; resultDiv.textContent="Error: "+data.error;
+        } else {
+          score=data.score??0; 
+          const {label,color}=getRiskCategory(score); 
+          verdict=label;
+          const textPreview = data.text_extracted ? `<div class="small">Text: ${data.text_extracted.substring(0,100)}</div>` : '';
+          resultDiv.innerHTML=`<div class="risk" style="color:${color}; font-weight:800;">${verdict}</div>Score: ${score}${textPreview}`;
+        }
+
+      } else if(type === 'email') {
+        const sender = $('#emailSender').value.trim();
+        const subject = $('#emailSubject').value.trim();
+        const bodyText = $('#emailBody').value.trim();
+        if (!sender || !subject || !bodyText) { alert('Enter sender, subject, body'); return; }
+        const body = { sender, subject, body: bodyText };
+        input = `${sender} | ${truncate(subject,50)}`;
+        const res = await fetch('/api/email/check', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+        const data = await res.json();
+        score=data.risk_score??0;
+        const {label,color}=getRiskCategory(score);
+        verdict=label;
+        reasons=data.reasons??[];
+        const reasonsDiv = reasons.length ? `<div class="small">Reasons: ${reasons.join(', ')}</div>` : '';
+        resultDiv.innerHTML=`<div class="risk" style="color:${color}; font-weight:800;">${verdict}</div>Score: ${score}${reasonsDiv}`;
+      }
+
+      // ✅ Save scan exactly once
+      saveScan({ type, input, verdict, score, when: Date.now() });
+      renderTrendChart();
+      renderRiskGauge(score);
+
+    } catch(err){
+      console.error(err);
+      resultDiv.textContent='Error: Failed to scan.';
+    }
+  });
 }
 
 // Initialize scanner
@@ -379,18 +370,79 @@ renderScanner($('#scannerType').value);
 // -------------------------------
 // --- Feedback & Complaints ---
 // -------------------------------
-$('#submitFeedback')?.addEventListener('click', () => {
-  const f = $('#feedbackInput').value.trim();
-  if (!f) { alert('Enter feedback'); return; }
-  state.feedback.push({ feedback: f, when: Date.now() });
-  localStorage.setItem('feedback', JSON.stringify(state.feedback));
-  $('#feedbackResult').textContent = 'Feedback submitted!';
-  $('#feedbackInput').value = '';
+// Submit feedback
+// Load feedback from backend
+async function loadFeedback() {
+    try {
+        const res = await fetch('/feedback/all');
+        if (!res.ok) throw new Error('Failed to fetch feedback');
+        state.feedback = await res.json();
+
+        // Optionally render feedback in a table or list
+        const tbody = $('#feedbackTable tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        state.feedback.slice().reverse().forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${new Date(f.timestamp).toLocaleString()}</td>
+                <td>${f.message}</td>
+                <td>${f.id}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Submit new feedback
+async function submitFeedback(message) {
+    if (!message.trim()) {
+        alert('Enter a message for feedback');
+        return;
+    }
+
+    const payload = { message: message.trim() };
+
+    try {
+        const res = await fetch('/feedback/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (data.id) {
+            state.feedback.push({ ...payload, id: data.id, timestamp: Date.now() });
+            $('#feedbackInput').value = '';
+            $('#feedbackResult').textContent = 'Feedback submitted successfully!';
+            setTimeout(() => { $('#feedbackResult').textContent = ''; }, 3000);
+            await loadFeedback(); // Refresh table from backend
+        } else {
+            $('#feedbackResult').textContent = 'Failed to submit feedback.';
+        }
+    } catch (err) {
+        console.error(err);
+        $('#feedbackResult').textContent = 'Error submitting feedback.';
+    }
+}
+
+// Event listener for feedback submission
+$('#submitFeedbackBtn')?.addEventListener('click', () => {
+    const message = $('#feedbackInput')?.value || '';
+    submitFeedback(message);
 });
+
+// Initial load
+loadFeedback();
+
 
 // -------------------------------
 // --- Scam Report Submission ---
 // -------------------------------
+
 $('#submitReportBtn')?.addEventListener('click', async () => {
     const text = $('#reportText').value.trim();
     const category = $('#reportCategory').value.trim();
@@ -415,6 +467,7 @@ $('#submitReportBtn')?.addEventListener('click', async () => {
             $('#reportResult').textContent = `Reported successfully! ID: ${data.report_id}`;
             $('#reportText').value = '';
             $('#reportCategory').value = '';
+            await fetchReports();  // Refresh table after successful submission
         } else {
             $('#reportResult').textContent = 'Failed to report.';
         }
@@ -444,7 +497,7 @@ async function fetchReports() {
             tr.innerHTML = `
                 <td>${new Date(r.timestamp).toLocaleString()}</td>
                 <td>${truncate(r.text, 50)}</td>
-                <td>${r.category}</td>
+                <td>${r.category || '-'}</td>
                 <td>${r.id}</td>
             `;
             tbody.appendChild(tr);
@@ -455,42 +508,11 @@ async function fetchReports() {
     }
 }
 
-// Refresh reports after submission
-$('#submitReportBtn')?.addEventListener('click', async () => {
-    const text = $('#reportText').value.trim();
-    const category = $('#reportCategory').value.trim();
-
-    if (!text) { alert('Enter text for the report'); return; }
-
-    const payload = { text, category: category || null };
-
-    try {
-        const res = await fetch('/report/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if (data.report_id) {
-            $('#reportResult').textContent = `Reported successfully! ID: ${data.report_id}`;
-            $('#reportText').value = '';
-            $('#reportCategory').value = '';
-            fetchReports();  // Refresh table
-        } else {
-            $('#reportResult').textContent = 'Failed to report.';
-        }
-
-        setTimeout(() => { $('#reportResult').textContent = ''; }, 5000);
-    } catch (err) {
-        console.error(err);
-        $('#reportResult').textContent = 'Error submitting report.';
-    }
-});
-
-// Initial load
+// -------------------------------
+// --- Initial Load ---
+// -------------------------------
 fetchReports();
+
 
 
 // -------------------------------

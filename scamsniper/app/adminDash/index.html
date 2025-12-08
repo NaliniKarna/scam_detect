@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScamSight — Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- LOGIN PAGE -->
+  <div id="loginPage">
+    <div class="login-container">
+      <div class="brand"><img src="logo.jpg" alt="ScamSight Logo" class="logo"></div>
+      <h1>Admin Login</h1>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required>
+        <div class="password-container">
+          <input type="password" id="password" placeholder="Password" required>
+          <i class="fa fa-eye" id="togglePassword"></i>
+        </div>
+        <button type="submit" class="btn login-btn">
+          <i class="fa fa-right-to-bracket"></i> Log In
+        </button>
+        <div class="error" id="loginError"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div class="app" id="dashboardPage" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">SS</div>
+        <div>
+          <h1>ScamSight</h1>
+          <p>Admin Dashboard</p>
+        </div>
+      </div>
+      <nav>
+        <div class="nav-item active" data-section="dashboard"><i class="fa fa-chart-line"></i> Dashboard</div>
+        <div class="nav-item" data-section="history"><i class="fa fa-clock-rotate-left"></i> Scan History</div>
+        <div class="nav-item" data-section="users"><i class="fa fa-users"></i> Users</div>
+        <div class="nav-item" data-section="support"><i class="fa fa-life-ring"></i> Support</div>
+        <div class="nav-item" data-section="feedback"><i class="fa fa-comment-dots"></i> Feedback</div>
+        <div class="nav-item" data-section="settings"><i class="fa fa-gear"></i> Settings</div>
+      </nav>
+      <hr>
+      <div class="small muted">Logged in as <strong>admin@gmail.com</strong></div>
+      <button class="btn" id="logout">Log out</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+      <div class="topbar">
+        <div class="search">
+          <i class="fa fa-magnifying-glass"></i>
+          <input id="globalSearch" placeholder="Search history, URL, email or user..." />
+        </div>
+        <div class="topbar-right">
+          <button id="themeToggle" class="btn ghost"><i class="fa fa-moon"></i></button>
+        </div>
+      </div>
+
+      <!-- DASHBOARD SECTION -->
+      <section id="dashboard" class="section">
+        <div class="grid">
+          <div class="card"><h3>Total Scans</h3><div class="value" id="totalScans">0</div></div>
+          <div class="card"><h3>Scams Detected</h3><div class="value" id="scamsDetected">0</div></div>
+          <div class="card"><h3>Active Users</h3><div class="value" id="activeUsers">0</div></div>
+        </div>
+        <div class="card"><h3>Traffic & Detection Trend</h3><canvas id="trendChart"></canvas></div>
+      </section>
+
+      <!-- SCAN HISTORY -->
+      <section id="history" class="section" style="display:none">
+        <div class="card">
+          <h3>All User Activity</h3>
+          <table id="historyTable">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Input</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <button class="btn" onclick="clearAllHistory()">Clear All</button>
+        </div>
+      </section>
+
+      <!-- USERS SECTION -->
+      <section id="users" class="section" style="display:none">
+        <div class="card">
+          <h3>Users Overview</h3>
+          <div class="grid">
+            <div class="card small-card"><h4>New Users</h4><div class="value" id="newUsers">0</div></div>
+            <div class="card small-card"><h4>Active Users</h4><div class="value" id="activeUsersCount">0</div></div>
+            <div class="card small-card"><h4>Top Contributors</h4><div class="value" id="topContributors">0</div></div>
+          </div>
+          <div class="card">
+            <h4>Recent Users</h4>
+            <table id="recentUsersTable">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Sign-up Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SUPPORT SECTION -->
+      <section id="support" class="section" style="display:none"> 
+        <div class="card"> <h3>Display Issue</h3> 
+          <textarea id="supportInput" placeholder="Issue"></textarea>
+           <button class="btn" id="submitSupport">Display</button>
+            <div id="supportResult"></div> </div> </section>
+
+      <!-- FEEDBACK SECTION -->
+      <section id="feedback" class="section" style="display:none"> <div class="card"> 
+        <h3>Feedback</h3> <p class="small muted">View all feedback submitted by users</p>
+         <textarea id="feedbackInput" placeholder="feedback"></textarea> 
+         <button class="btn" id="submitFeedback">Display Feedback</button>
+         </div> 
+        </section>
+
+      <!-- SETTINGS SECTION -->
+      <section id="settings" class="section" style="display:none">
+        <div class="settings-item">
+          <div class="item-label">Name</div>
+          <div class="item-value" id="profileName">Alex Jackson</div>
+          <button class="btn ghost small-btn edit-btn">Edit</button>
+        </div>
+        <div class="settings-item">
+          <div class="item-label">Contacts</div>
+          <div class="item-value" id="profileContacts">Phone: +123123217923<br>Email: finalui@yandex.com</div>
+          <button class="btn ghost small-btn edit-btn">Edit</button>
+        </div>
+        <div class="settings-item">
+          <div class="item-label">Social Media</div>
+          <div class="item-value" id="profileSocial">linkedin.com/company/finalui<br>dribbble.com/final-ui</div>
+          <button class="btn ghost small-btn edit-btn">Edit</button>
+        </div>
+        <div class="settings-item">
+          <div class="item-label">Language & Currency</div>
+          <div class="item-value" id="profileLang">English, USD</div>
+          <button class="btn ghost small-btn edit-btn">Edit</button>
+        </div>
+        <div class="settings-item">
+          <div class="item-label">Theme</div>
+          <select id="themeSelect">
+            <option value="dark">Dark mode</option>
+            <option value="light">Light mode</option>
+          </select>
+        </div>
+        <div class="settings-item">
+          <div class="item-label">Integration</div>
+          <div class="item-value" id="profileIntegration">Google • examplemail@gmail.com</div>
+          <button class="btn ghost small-btn connect-btn">Connected</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
