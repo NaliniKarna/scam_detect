@@ -1,12 +1,16 @@
 fastapi
 uvicorn
+python-multipart
+torch==2.2.0+cpu
+torchvision==0.17.0+cpu
 transformers
-torch
-requests
-python-dotenv
-pydantic
-beautifulsoup4
 easyocr
+opencv-python-headless
+numpy
 Pillow
+<<<<<<< HEAD
 python-multipart
 opencv-python
+=======
+python-dotenv
+>>>>>>> 32d24e8a4cb2111db72b3171a99d1c53982adcf2
