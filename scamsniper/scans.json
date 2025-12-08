@@ -1,245 +1,47 @@
 [
     {
+        "type": "transaction",
+        "input": "{\"amount\":null,\"currency\":\"\",\"timestamp\":\"\",\"transaction_id\":\"\",\"sender\":\"\",\"recipient\":\"\",\"status\":\"\",\"description\":\"\"}",
+        "verdict": "Scam",
+        "score": 95.0,
+        "when": 1765174342560,
+        "timestamp": "2025-12-08T06:12:22.560000",
+        "id": "d0cd16d9-3835-4308-8f5f-792e5cf6a0a0"
+    },
+    {
+        "type": "url",
+        "input": "https://www.buddhaair.com/",
+        "verdict": "SAFE",
+        "score": 0.0,
+        "when": 1765174441694,
+        "timestamp": "2025-12-08T06:14:01.694000",
+        "id": "7e54ef15-c75b-4251-9b5e-f3c34d4ae53b"
+    },
+    {
+        "type": "url",
+        "input": "http://login-security.verify-account-update.fake-site.test/",
+        "verdict": "SCAM",
+        "score": 85.0,
+        "when": 1765174468426,
+        "timestamp": "2025-12-08T06:14:28.426000",
+        "id": "b074dde2-417d-4331-b8cc-84295092d6fd"
+    },
+    {
         "type": "image",
-        "input": "munna.jpg",
+        "input": "OCRimg.jpg",
         "verdict": "Scam",
         "score": 87.0,
-        "when": 1765157555691,
-        "timestamp": "2025-12-08T01:32:35.691000",
-        "id": "eadd5de7-9728-41cb-bcd7-a316a994bea6"
+        "when": 1765174509419,
+        "timestamp": "2025-12-08T06:15:09.419000",
+        "id": "0d631899-2700-4a32-ad29-26997ab6c68b"
     },
     {
         "type": "transaction",
         "input": "{\"amount\":null,\"currency\":\"\",\"timestamp\":\"\",\"transaction_id\":\"\",\"sender\":\"\",\"recipient\":\"\",\"status\":\"\",\"description\":\"\"}",
         "verdict": "Scam",
         "score": 95.0,
-        "when": 1765157622647,
-        "timestamp": "2025-12-08T01:33:42.647000",
-        "id": "9da8f812-2cda-4bcf-92fd-42e29555d79f"
-    },
-    {
-        "type": "text",
-        "input": "hi i am dash",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765163988758,
-        "timestamp": "2025-12-08T03:19:48.758000",
-        "id": "2d2bf4d4-75f1-4680-a6e3-90b955f38dc6"
-    },
-    {
-        "type": "text",
-        "input": "hi i am dash",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765163988776,
-        "timestamp": "2025-12-08T03:19:48.776000",
-        "id": "ceb27c22-3765-49a3-b20c-289ab4182cae"
-    },
-    {
-        "type": "text",
-        "input": "hi",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765164817334,
-        "timestamp": "2025-12-08T03:33:37.334000",
-        "id": "2307cc9a-3639-4fb6-9d4e-8c60cff1b9ea"
-    },
-    {
-        "type": "text",
-        "input": "hi",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765164817349,
-        "timestamp": "2025-12-08T03:33:37.349000",
-        "id": "6fb84579-9330-4f53-8b03-c3104114eae7"
-    },
-    {
-        "type": "text",
-        "input": "\"Congratulations! You have won a $1,000 gift card. Click the link and enter your personal details to claim your prize immediately.\"",
-        "verdict": "SUSPICIOUS",
-        "score": 77.0,
-        "when": 1765164935129,
-        "timestamp": "2025-12-08T03:35:35.129000",
-        "id": "01a762f3-2ed5-4214-a624-0ae0fa354f9f"
-    },
-    {
-        "type": "text",
-        "input": "\"Congratulations! You have won a $1,000 gift card. Click the link and enter your personal details to claim your prize immediately.\"",
-        "verdict": "SUSPICIOUS",
-        "score": 77.0,
-        "when": 1765164935140,
-        "timestamp": "2025-12-08T03:35:35.140000",
-        "id": "2d21cd0a-a380-4358-a548-69c5b2422703"
-    },
-    {
-        "type": "text",
-        "input": "hi i am bob",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765165413779,
-        "timestamp": "2025-12-08T03:43:33.779000",
-        "id": "046b252a-f61f-4720-b378-47b4c313ebbc"
-    },
-    {
-        "type": "text",
-        "input": "hi i am bob",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765165413791,
-        "timestamp": "2025-12-08T03:43:33.791000",
-        "id": "41e302a7-d533-45b3-85ec-4822ad734c29"
-    },
-    {
-        "type": "text",
-        "input": "hi i am alice",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765165758889,
-        "timestamp": "2025-12-08T03:49:18.889000",
-        "id": "b5d9814b-1196-4aa0-a009-1041bd0d9d69"
-    },
-    {
-        "type": "text",
-        "input": "hi i am alice",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765165758899,
-        "timestamp": "2025-12-08T03:49:18.899000",
-        "id": "d23dd3fb-8ef4-48f3-8960-7b7deae9d6fc"
-    },
-    {
-        "type": "text",
-        "input": "hi i am",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765165868657,
-        "timestamp": "2025-12-08T03:51:08.657000",
-        "id": "926fb408-7e84-4784-b598-eab82ebd4152"
-    },
-    {
-        "type": "text",
-        "input": "hi i am",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765165868676,
-        "timestamp": "2025-12-08T03:51:08.676000",
-        "id": "4974e738-c2a1-43c3-9b1b-577a3d66ef34"
-    },
-    {
-        "type": "text",
-        "input": "hi",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765165889385,
-        "timestamp": "2025-12-08T03:51:29.385000",
-        "id": "2a73c2d3-c65a-4bf0-b9b5-c2f03b3dd018"
-    },
-    {
-        "type": "text",
-        "input": "hi",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765165889394,
-        "timestamp": "2025-12-08T03:51:29.394000",
-        "id": "146c04f0-8ba7-4dee-9803-2bde7322dada"
-    },
-    {
-        "type": "url",
-        "input": "hi",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166141440,
-        "timestamp": "2025-12-08T03:55:41.440000",
-        "id": "4b3210e4-912f-405b-bda7-ae1b7ddff496"
-    },
-    {
-        "type": "url",
-        "input": "hi",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166141450,
-        "timestamp": "2025-12-08T03:55:41.450000",
-        "id": "c62d45ac-93d7-4286-9feb-d44d58061e98"
-    },
-    {
-        "type": "text",
-        "input": "hi",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166190144,
-        "timestamp": "2025-12-08T03:56:30.144000",
-        "id": "be587792-fda8-4c53-828c-bedf4479438c"
-    },
-    {
-        "type": "text",
-        "input": "hi",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166190150,
-        "timestamp": "2025-12-08T03:56:30.150000",
-        "id": "bfc308be-2bb4-4784-ad08-7af17c158df6"
-    },
-    {
-        "type": "text",
-        "input": "not a bug",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166399825,
-        "timestamp": "2025-12-08T03:59:59.825000",
-        "id": "a9c475bf-0ef8-4e95-a66c-6d1d96cd9bb9"
-    },
-    {
-        "type": "text",
-        "input": "not a bug",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166399839,
-        "timestamp": "2025-12-08T03:59:59.839000",
-        "id": "8d480db7-f1f1-45d2-ae7a-193b08a05ea9"
-    },
-    {
-        "type": "url",
-        "input": "https://www.buddhaair.com/",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166601595,
-        "timestamp": "2025-12-08T04:03:21.595000",
-        "id": "9e460f49-7406-46f2-9e82-a9624af3e077"
-    },
-    {
-        "type": "url",
-        "input": "https://www.buddhaair.com/",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166601612,
-        "timestamp": "2025-12-08T04:03:21.612000",
-        "id": "178ed47c-dde4-46f0-a352-c5508ad890c6"
-    },
-    {
-        "type": "url",
-        "input": "https://www.buddhaair.com/",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166688324,
-        "timestamp": "2025-12-08T04:04:48.324000",
-        "id": "eec19972-f248-46e4-9411-0dc62d059b1d"
-    },
-    {
-        "type": "url",
-        "input": "https://www.buddhaair.com/",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765166688341,
-        "timestamp": "2025-12-08T04:04:48.341000",
-        "id": "19950356-0aa4-4350-bb04-51a209a0e163"
-    },
-    {
-        "type": "url",
-        "input": "https://www.buddhaair.com/",
-        "verdict": "SAFE",
-        "score": 0.0,
-        "when": 1765167091296,
-        "timestamp": "2025-12-08T04:11:31.296000",
-        "id": "2a55a572-559b-46bd-81d5-c5368ae7a307"
+        "when": 1765174605378,
+        "timestamp": "2025-12-08T06:16:45.378000",
+        "id": "09eed54b-5072-4ab0-b064-281c617beb48"
     }
 ]
