@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScamSight — User Dashboard</title>
+
+<!-- Styles -->
+<link rel="stylesheet" href="/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Main App JS (Loaded Once) -->
+<script src="/app.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">SS</div>
+      <div>
+        <h1>ScamSight</h1>
+        <p>User Dashboard</p>
+      </div>
+    </div>
+    <nav>
+      <!-- <div class="nav-item active" data-section="profile"><i class="fa fa-user"></i> Profile</div> -->
+      <div class="nav-item" data-section="scan"><i class="fa fa-search"></i> Detect</div>
+      <div class="nav-item" data-section="history"><i class="fa fa-clock-rotate-left"></i> History</div>
+      <div class="nav-item" data-section="report"><i class="fa fa-flag"></i> Report</div>
+      <div class="nav-item" data-section="subscription"><i class="fa fa-credit-card"></i> Subscription</div>
+      <div class="nav-item" data-section="trend"><i class="fa fa-chart-line"></i> Trend</div>
+      <div class="nav-item" data-section="challenge"><i class="fa fa-trophy"></i> Challenge</div>
+      <div class="nav-item" data-section="feedback"><i class="fa fa-comment-dots"></i> Feedback</div>
+      <!-- <div class="nav-item" data-section="settings"><i class="fa fa-cog"></i> Settings</div> -->
+      <div class="nav-item" id="logout"><i class="fa fa-sign-out-alt"></i> Logout</div>
+    </nav>
+    <hr>
+    <div class="small muted">Logged in as <strong>user@scamsight.local</strong></div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="search">
+        <i class="fa fa-magnifying-glass"></i>
+        <input id="globalSearch" placeholder="Search history, URL, email or user..." />
+      </div>
+      <div class="topbar-right">
+        <button id="themeToggle" class="btn ghost"><i class="fa fa-moon"></i></button>
+        <div class="notification-wrapper">
+          <button id="notificationBtn" class="btn ghost">
+            <i class="fa fa-bell"></i>
+            <span id="notificationBadge">3</span>
+          </button>
+          <div id="notificationDropdown" class="notification-dropdown">
+            <div class="notification-item">New scan completed</div>
+            <div class="notification-item">Your subscription will expire soon</div>
+            <div class="notification-item">Feedback received</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Section -->
+    <!-- <section id="profile" class="section">
+      <div class="profile-card card">
+       <div class="profile-picture">
+          <img id="dashboardProfileImg" src="https://via.placeholder.com/150" alt="Profile Picture">
+        </div> -->
+        <!-- <div class="profile-info">
+          <h4 id="dashboardUsername">Username</h4>
+          <p><i class="fa fa-envelope"></i> <span id="dashboardEmail">user@example.com</span></p>
+          <p><i class="fa fa-calendar"></i> Registered: <span id="dashboardRegistered">--</span></p>
+          <p><i class="fa fa-circle"></i> Status: <span id="dashboardStatus">Active</span></p>
+          <p><i class="fa fa-clock"></i> Last Login: <span id="dashboardLastLogin">--</span></p>
+        </div>
+        <div class="profile-stats">
+          <div class="stat-box">
+            <h3>Total Scans</h3>
+            <span id="totalScans">0</span>
+          </div>
+          <div class="stat-box">
+            <h3>Scam Detections</h3>
+            <span id="scamDetections">0</span>
+          </div>
+        </div>
+      </div>
+    </section> --> 
+
+    <!-- Scanner Section -->
+    <section id="scan" class="section" style="display:none">
+      <div class="panel">
+        <div class="scanner card">
+          <h2>Quick Scanner</h2>
+          <select id="scannerType" class="input">
+            <option value="url">URL Scam Check</option>
+            <!-- <option value="otp">OTP Detector</option> -->
+            <!-- <option value="ocr">Document OCR</option> -->
+            <option value="text">Text Scam Check</option>
+            <option value="email">Email Scam Check</option>
+            <option value="image">Image Scam Check</option>
+            <option value="transaction">Transaction Scam Check</option>
+          </select>
+          <div id="scannerArea"></div>
+        </div>
+        <aside class="right">
+          <div class="card history">
+            <table id="recentTable">
+              <thead><tr><th>Type</th><th>Input</th><th>Verdict</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </aside>
+      </div>
+      <div class="card" style="margin-top:18px; text-align:center;">
+        <h3>Risk Assessment</h3>
+        <div id="gaugeContainer" style="width:260px; margin:auto; position:relative; height:160px;">
+          <canvas id="riskGauge"></canvas>
+          <div id="riskText" style="position:absolute; top:60%; left:50%; transform:translate(-50%,-50%); font-size:22px; font-weight:700;">High Risk</div>
+          <div style="position:absolute; bottom:0; left:0; font-size:12px;">0%</div>
+          <div style="position:absolute; bottom:0; right:0; font-size:12px;">100%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- History Section -->
+    <section id="history" class="section" style="display:none">
+      <div class="card">
+        <h2>Scan History</h2>
+        <table id="historyTable"><thead><tr><th>Date</th><th>Input</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+   <!-- Report Section -->
+    <section id="report" class="section" style="display:none">
+      <div class="card">
+        <h3>Report Scam</h3>
+        <textarea id="reportText" placeholder="Enter scam text here..." class="input"></textarea>
+        <input type="text" id="reportCategory" placeholder="Category (optional)" class="input"><br>
+        <button class="btn" id="submitReportBtn">Submit Report</button>
+        <div id="reportResult" class="result"></div>
+      </div>
+
+      <h3>Submitted Reports</h3>
+      <table id="reportsTable">
+        <thead>
+          <tr>
+              <th>Timestamp</th>
+              <th>Text</th>
+              <th>Category</th>
+              <th>Report ID</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+
+    <!-- Subscription Section -->
+    <section id="subscription" class="section" style="display:none">
+       <div class="subscription-container">
+         <h2 class="subscription-title">Choose Your Plan</h2> 
+         <div class="plans-grid">
+           <!-- Free plan --> 
+            <div class="plan-card plan-free">
+               <h3>Free</h3> <p class="plan-subtitle">Basic Safety</p> 
+               <ul class="plan-features"> <li><i class=></i> </li> 
+                <li><i class="fa fa-check-circle"></i> URL scam check</li> 
+                <li><i class="fa fa-check-circle"></i> Basic email scan</li> 
+                <li><i class="fa fa-check-circle"></i> Text scam detection</li>
+                 <li><i class="fa fa-xmark"></i> 1 OCR scan/day</li>
+                  <li><i class="fa fa-xmark"></i> No bank detail verification</li>
+                   <li><i class="fa fa-xmark"></i> No history</li> 
+                   <li><i class="fa fa-xmark"></i> Ads shown</li> 
+                  </ul> <button class="btn btn-primary">Continue Free</button> </div> 
+                  <!-- Pro Plan -->
+                    <div class="plan-card plan-pro recommended">
+                       <span class="badge">Recommended</span> <h3>Pro</h3>
+                        <p class="plan-price"><strong>$3.99</strong>/month</p> 
+                        <p class="plan-subprice">or $23/year</p> 
+                        <ul class="plan-features">
+                           <li><i class="fa fa-check-circle"></i> Unlimited scam scans</li>
+                            <li><i class="fa fa-check-circle"></i> Unlimited OCR documents</li> <li><i class="fa fa-check-circle"></i> Advanced text + email analysis</li> <li><i class="fa fa-check-circle"></i> OTP scam detection</li> <li><i class="fa fa-check-circle"></i> Scam explanation</li> <li><i class="fa fa-check-circle"></i> No ads</li> <li><i class="fa fa-check-circle"></i> Scan history, saved reports</li> <li><i class="fa fa-check-circle"></i> Priority fast scanning</li> </ul> <button class="btn btn-primary">Upgrade to Pro</button> </div> <!-- Premium --> <div class="plan-card plan-premium premium"> <h3>Premium</h3> <p class="plan-price"><strong>$7.99</strong>/month</p> <p class="plan-subprice">or $59/year</p> <ul class="plan-features"> <li><i class="fa fa-check-circle"></i> All Pro features</li> <li><i class="fa fa-check-circle"></i> Bank Detail Verification</li> <li><i class="fa fa-check-circle"></i> Bank Transaction Scam Detection</li> <li><i class="fa fa-check-circle"></i> Advanced AI Fraud Score</li> <li><i class="fa fa-check-circle"></i> Real-time WhatsApp/SMS alert monitoring</li> <li><i class="fa fa-check-circle"></i> Unlimited reports</li> <li><i class="fa fa-check-circle"></i> Auto-Report PDF</li> </ul> <button class="btn btn-primary premium">Get Premium Protection</button> </div> </div> </div> </section>
+
+    <!-- Trend Section -->
+    <section id="trend" class="section" style="display:none">
+      <div class="card">
+        <h3>Trend</h3>
+        <canvas id="trendChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Challenge Section -->
+    <section id="challenge" class="section" style="display:none">
+      <div class="challenge-container">
+        <h3>Weekly Challenges</h3>
+        <div class="challenge-grid">
+          <!-- Challenges same as previous HTML -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback Section -->
+    <section id="feedback" class="section" style="display:none">
+      <div class="card">
+        <h3>Feedback</h3>
+        <textarea id="feedbackInput" placeholder="Your feedback"></textarea>
+        <button class="btn" id="submitFeedback">Submit Feedback</button>
+        <div id="feedbackResult"></div>
+      </div>
+    </section>
+
+    <!-- Settings/Profile Section -->
+    <!-- <section id="settings" class="section" style="display:none">
+      <div class="card settings-card">
+        <h1>Settings</h1>
+        <div class="settings-profile">
+          <div class="profile-picture">
+            <img id="profileImg" src="https://via.placeholder.com/120" alt="Profile Picture">
+            <input type="file" id="profileUpload" accept="image/*">
+          </div> -->
+          <!-- <div class="profile-info">
+            <label>Name: <input type="text" id="profileName" class="input"></label>
+            <label>Username: <input type="text" id="profileUsername" class="input"></label>
+            <label>Email: <input type="email" id="profileEmail" class="input"></label>
+            <label>Phone: <input type="tel" id="profilePhone" class="input"></label>
+          </div>
+          <button class="btn" id="saveProfileBtn">Save Changes</button>
+          <div id="profileResult" class="small"></div>
+        </div>
+      </div>
+    </section> --> 
+
+  </main>
+</div>
+</body>
+</html>
